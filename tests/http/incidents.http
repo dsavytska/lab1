@@ -25,6 +25,14 @@ Accept: application/json
 GET {{host}}/api/incidents?status=Unknown
 Accept: application/json
 
-### Lab 1 extension point: expected 501 before student implementation
+### Empty but valid list: expected 200 with [] on baseline seed
+GET {{host}}/api/incidents?status=Resolved
+Accept: application/json
+
+### Lab 1 severity summary: expected 200 application/json (baseline returned 501)
+# Contract: JSON array of { "severity": string, "count": number }, no request body.
+# Zero-group policy: full list of levels, a level without incidents has count 0.
+# Order: explicit criticality order Low, Medium, High, Critical.
+# Expected on restored seed: Low 1, Medium 1, High 1, Critical 0.
 GET {{host}}/api/incidents/severity-summary
 Accept: application/json
