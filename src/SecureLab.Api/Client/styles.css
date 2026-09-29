@@ -138,3 +138,24 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.summary-panel {
+  grid-column: 1 / -1;
+}
+
+.summary-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summary-list li {
+  border: 1px solid #d8e0ec;
+  border-radius: 0.55rem;
+  background: #f5f8fc;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+}

@@ -58,4 +58,33 @@ public sealed class IncidentQueries(SecureLabDbContext dbContext, ILogger<Incide
                     .ToList()))
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    // Підсумок кількості інцидентів за severity.
+    // Політика нульових груп: повний перелік рівнів (відсутній рівень має count = 0).
+    // Порядок: явний порядок критичності Low -> Medium -> High -> Critical (порядок enum),
+    // а не лексикографічний порядок текстового стовпця severity у PostgreSQL.
+    public async Task<IReadOnlyList<IncidentSeveritySummaryResponse>> GetSeveritySummaryAsync(
+        CancellationToken cancellationToken)
+    {
+        var groups = await dbContext.Incidents
+            .AsNoTracking()
+            .GroupBy(incident => incident.Severity)
+            .Select(group => new { Severity = group.Key, Count = group.Count() })
+            .ToListAsync(cancellationToken);
+
+        var counts = groups.ToDictionary(group => group.Severity, group => group.Count);
+
+        var summary = Enum.GetValues<IncidentSeverity>()
+            .Select(severity => new IncidentSeveritySummaryResponse(
+                severity.ToString(),
+                counts.GetValueOrDefault(severity)))
+            .ToList();
+
+        logger.LogInformation(
+            "Severity summary built: {GroupCount} groups from database, {ItemCount} items returned",
+            groups.Count,
+            summary.Count);
+
+        return summary;
+    }
 }
