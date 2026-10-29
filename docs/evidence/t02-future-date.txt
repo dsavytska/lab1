@@ -1,0 +1,16 @@
+## T-02. Дата більш ніж на 5 хвилин у майбутньому
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Інцидент із майбутнього",
+  "description": "Тестовий опис.",
+  "severity": "Low",
+  "occurredAtUtc": "2099-01-01T00:00:00Z"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t02_future.json'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"occurredAtUtc":["Час виявлення не може бути в майбутньому."]},"traceId":"00-d18bcfd48d042f2848294d0ed05c6407-5d8bd4b31d1db0b3-00"}

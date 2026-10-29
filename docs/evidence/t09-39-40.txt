@@ -1,0 +1,34 @@
+## T-09. High + опис 39 символів після Trim
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Межа cross-field 39",
+  "description": "  012345678901234567890123456789012345678  ",
+  "severity": "High",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t09_39.json'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"description":["Для High або Critical опис має містити щонайменше 40 символів."]},"traceId":"00-8bd13907e105aad614f44b2b6b9cdaef-138c7bafafb53b92-00"}
+
+## T-09. High + опис 40 символів після Trim
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Межа cross-field 40",
+  "description": "  0123456789012345678901234567890123456789  ",
+  "severity": "High",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t09_40.json'
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Location: /api/incidents/1e4842fd-d32c-4ec4-81aa-36090c3e3152
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"id":"1e4842fd-d32c-4ec4-81aa-36090c3e3152","title":"Межа cross-field 40","severity":"High","status":"New","occurredAtUtc":"2026-10-28T06:30:00+00:00","createdAtUtc":"2026-10-29T14:49:18.9195919+00:00"}

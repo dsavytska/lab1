@@ -1,0 +1,17 @@
+## T-01. Коректне створення інциденту
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Підозрілий USB-пристрій у лабораторії 204",
+  "description": "Студент повідомив про невідомий USB-накопичувач.",
+  "severity": "Medium",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t01_valid.json'
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Location: /api/incidents/6161a045-9502-4c50-aff0-6a6c742f1574
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"id":"6161a045-9502-4c50-aff0-6a6c742f1574","title":"Підозрілий USB-пристрій у лабораторії 204","severity":"Medium","status":"New","occurredAtUtc":"2026-10-28T06:30:00+00:00","createdAtUtc":"2026-10-29T14:49:12.9846921+00:00"}

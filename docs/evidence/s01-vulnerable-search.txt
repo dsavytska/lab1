@@ -1,0 +1,52 @@
+## Запит A. Звичайний пошук
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=USB"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[{"id":"20000000-0000-0000-0000-000000000005","title":"Перевірка USB навчальної мережі","description":"Навчальний запис для перевірки пошуку без реальних персональних даних.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T09:00:00+00:00"}]
+
+## Запит B. Значення, якого немає
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=zz-no-match"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[]
+
+## Запит C. Єдиний дозволений контрольний ввід (read-only)
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=zz-no-match%27%20OR%20TRUE%20--%20"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[{"id":"20000000-0000-0000-0000-000000000001","title":"Підозрілий лист із вкладенням","description":"Одержано лист нібито від деканату. Вкладення не відкривалося.","severity":"Medium","status":"Triaged","createdAtUtc":"2026-08-01T09:00:00+00:00"},{"id":"20000000-0000-0000-0000-000000000002","title":"Невідома спроба входу","description":"Система зафіксувала вхід до облікового запису з нового пристрою.","severity":"High","status":"InProgress","createdAtUtc":"2026-08-02T14:20:00+00:00"},{"id":"20000000-0000-0000-0000-000000000003","title":"Перевірка журналу комп'ютерного класу","description":"Текст <script> має відображатися як текст, а не виконуватися як HTML.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T08:00:00+00:00"},{"id":"20000000-0000-0000-0000-000000000004","title":"O'Brien classroom report","description":"Навчальний запис для перевірки пошуку без реальних персональних даних.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T09:00:00+00:00"},{"id":"20000000-0000-0000-0000-000000000005","title":"Перевірка USB навчальної мережі","description":"Навчальний запис для перевірки пошуку без реальних персональних даних.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T09:00:00+00:00"}]
+
+Кількість повернених записів: 5
+ - 20000000-0000-0000-0000-000000000001  Підозрілий лист із вкладенням
+ - 20000000-0000-0000-0000-000000000002  Невідома спроба входу
+ - 20000000-0000-0000-0000-000000000003  Перевірка журналу комп'ютерного класу
+ - 20000000-0000-0000-0000-000000000004  O'Brien classroom report
+ - 20000000-0000-0000-0000-000000000005  Перевірка USB навчальної мережі
+
+## Запит D. Легітимний апостроф: O'Brien
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=O%27Brien"
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An error occurred while processing your request.","status":500,"traceId":"00-c343bf2093a0ae3b0fcd4aac543ba581-d57cfc68287eef0d-00"}
+
+## Позитивна регресія: комп'ютерного (апостроф U+0027)
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=%D0%BA%D0%BE%D0%BC%D0%BF%27%D1%8E%D1%82%D0%B5%D1%80%D0%BD%D0%BE%D0%B3%D0%BE"
+HTTP/1.1 500 Internal Server Error
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.6.1","title":"An error occurred while processing your request.","status":500,"traceId":"00-87e17776abe2e1b4e8640d08f766cf75-b36651188ff93b8f-00"}

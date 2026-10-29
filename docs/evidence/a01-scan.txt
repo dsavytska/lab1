@@ -1,0 +1,7 @@
+## A-01. Read-only скан доступу до даних (data-access-scan.py)
+PS lab1>
+py -3 "<ЛР2>\lab-02-scaffold\resources\copyable\data-access-scan.py" .
+src\SecureLab.Api\Data\DatabaseBootstrap.cs:29:await dbContext.Database.ExecuteSqlRawAsync(
+PS lab1>
+git --no-pager grep -n -E "FromSqlRaw|ExecuteSqlRaw|ORDER BY|SELECT " -- src tests
+src/SecureLab.Api/Data/DatabaseBootstrap.cs:29:            await dbContext.Database.ExecuteSqlRawAsync(

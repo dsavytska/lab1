@@ -1,0 +1,14 @@
+## T-02. Кілька помилок в одному запиті
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "   ",
+  "severity": "Urgent"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t02_many.json'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"title":["Назва інциденту обов'язкова."],"description":["Опис інциденту обов'язковий."],"severity":["Допустимі значення: Low, Medium, High, Critical."],"occurredAtUtc":["Час виявлення інциденту обов'язковий."]},"traceId":"00-f5f662b648f373e349502613a5651575-639a79a819911ba7-00"}

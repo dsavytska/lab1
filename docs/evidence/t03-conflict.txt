@@ -1,0 +1,51 @@
+## T-03. Повторна назва активного інциденту
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Невідома спроба входу",
+  "description": "Повторне повідомлення про той самий випадок.",
+  "severity": "Low",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t03_dup.json'
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Інцидент уже існує","status":409,"detail":"Активний інцидент з такою назвою вже зареєстровано.","traceId":"00-814a7faa825bff80ba5fe5f9eeb67966-3e088f830bb49265-00"}
+
+## T-03. Та сама назва з пробілами на краях
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "   Невідома спроба входу   ",
+  "description": "Повторне повідомлення з пробілами.",
+  "severity": "Low",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t03_trim.json'
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Інцидент уже існує","status":409,"detail":"Активний інцидент з такою назвою вже зареєстровано.","traceId":"00-188e3358c686e74cdc051a8063f6292c-96231cfd0eb44b0d-00"}
+
+## T-03. Та сама назва в іншому регістрі
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "невідома спроба входу",
+  "description": "Заголовок відрізняється регістром першої літери.",
+  "severity": "Low",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t03_case.json'
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Location: /api/incidents/1764ec04-a40d-4d30-9bf5-72669eb00bef
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"id":"1764ec04-a40d-4d30-9bf5-72669eb00bef","title":"невідома спроба входу","severity":"Low","status":"New","occurredAtUtc":"2026-10-28T06:30:00+00:00","createdAtUtc":"2026-10-29T14:49:21.9396231+00:00"}

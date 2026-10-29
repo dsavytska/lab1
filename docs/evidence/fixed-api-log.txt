@@ -1,0 +1,9 @@
+## Журнал API після виправлення: значення передається параметром
+Executed DbCommand (3ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (3ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (2ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (2ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (3ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (3ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (4ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+Executed DbCommand (2ms) [Parameters=[@pattern='?', @pattern0='?', @p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']

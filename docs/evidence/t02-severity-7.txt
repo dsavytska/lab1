@@ -1,0 +1,16 @@
+## T-02. severity = "7" (TryParse + IsDefined)
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "Перевірка числового severity",
+  "description": "Тестовий опис.",
+  "severity": "7",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t02_sev7.json'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"severity":["Допустимі значення: Low, Medium, High, Critical."]},"traceId":"00-5a1d510a716d360107962349947d5b42-c0f4c65f41c55cf0-00"}

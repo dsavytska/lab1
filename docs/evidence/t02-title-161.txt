@@ -1,0 +1,16 @@
+## T-02. Назва довша за 160 символів
+Тіло запиту (tests/http/lab-02-checks.http):
+{
+  "title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "description": "Тестовий опис.",
+  "severity": "Low",
+  "occurredAtUtc": "2026-10-28T09:30:00+03:00"
+}
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/incidents -H 'Content-Type: application/json' --data-binary '@C:\Users\OLEKSA~1\AppData\Local\Temp\lr2b\t02_long.json'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"title":["Назва інциденту не може бути довшою за 160 символів."]},"traceId":"00-0cb7a3f284a5135278d3c52f942503de-efec915216d23c7d-00"}

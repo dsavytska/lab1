@@ -1,0 +1,86 @@
+## T-04. Звичайний пошук після виправлення: q=USB
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=USB"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[{"id":"20000000-0000-0000-0000-000000000005","title":"Перевірка USB навчальної мережі","description":"Навчальний запис для перевірки пошуку без реальних персональних даних.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T09:00:00+00:00"}]
+
+Записів: 1   (title | severity | status | createdAtUtc)
+ - Перевірка USB навчальної мережі | Low | New | 2026-08-03T09:00:00+00:00
+
+## B. Значення, якого немає
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=zz-no-match"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[]
+
+Записів: 0   (title | severity | status | createdAtUtc)
+
+## S-02. Той самий контрольний ввід після виправлення (очікую [])
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=zz-no-match%27%20OR%20TRUE%20--%20"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[]
+
+Записів: 0   (title | severity | status | createdAtUtc)
+
+## T-04. Легітимний апостроф: O'Brien
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=O%27Brien"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[{"id":"20000000-0000-0000-0000-000000000004","title":"O'Brien classroom report","description":"Навчальний запис для перевірки пошуку без реальних персональних даних.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T09:00:00+00:00"}]
+
+Записів: 1   (title | severity | status | createdAtUtc)
+ - O'Brien classroom report | Low | New | 2026-08-03T09:00:00+00:00
+
+## T-04. Легітимний апостроф: комп'ютерного
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=%D0%BA%D0%BE%D0%BC%D0%BF%27%D1%8E%D1%82%D0%B5%D1%80%D0%BD%D0%BE%D0%B3%D0%BE"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[{"id":"20000000-0000-0000-0000-000000000003","title":"Перевірка журналу комп'ютерного класу","description":"Текст <script> має відображатися як текст, а не виконуватися як HTML.","severity":"Low","status":"New","createdAtUtc":"2026-08-03T08:00:00+00:00"}]
+
+Записів: 1   (title | severity | status | createdAtUtc)
+ - Перевірка журналу комп'ютерного класу | Low | New | 2026-08-03T08:00:00+00:00
+
+## Екранування LIKE: q=% шукається буквально (очікую [])
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=%25"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[]
+
+Записів: 0   (title | severity | status | createdAtUtc)
+
+## Екранування LIKE: q=_ шукається буквально (очікую [])
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/search?q=_"
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+[]
+
+Записів: 0   (title | severity | status | createdAtUtc)

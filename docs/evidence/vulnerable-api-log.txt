@@ -1,0 +1,21 @@
+## Журнал API (лише рядки з метаданими команд, без тексту SQL)
+SqlState: 42601
+Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "Brien"
+SqlState: 42601
+Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "Brien"
+SqlState: 42601
+Failed executing DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "ютерного"
+SqlState: 42601
+Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "ютерного"
+SqlState: 42601
+Npgsql.PostgresException (0x80004005): 42601: syntax error at or near "ютерного"
+SqlState: 42601
+
+## Першопричина: місце складання SQL у Lab02Endpoints.cs
+  12:         app.MapGet("/api/incidents/search", async (string? q, string? sortBy, SecureLabDbContext db, CancellationToken ct) =>
+  14:             var order = sortBy switch
+  17:                 "severity" => "severity", "status" => "status", _ => sortBy
+  19:             var sql = "SELECT * FROM incidents WHERE title ILIKE '%" + (q ?? "")
+  20:                 + "%' OR description ILIKE '%" + (q ?? "") + "%' ORDER BY " + order + " LIMIT 50";
+  21:             var rows = await db.Incidents.FromSqlRaw(sql).AsNoTracking().ToListAsync(ct);

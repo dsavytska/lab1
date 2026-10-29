@@ -1,0 +1,9 @@
+## T-06. Неіснуючий інцидент (404 Problem Details)
+PS lab1>
+curl.exe -s -i "http://localhost:5080/api/incidents/99999999-9999-9999-9999-999999999999"
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Інцидент не знайдено","status":404,"detail":"Інцидент '99999999-9999-9999-9999-999999999999' не існує.","traceId":"00-705e28d5a271256110c758f1e2fe5cec-34375abd0f47b963-00"}
