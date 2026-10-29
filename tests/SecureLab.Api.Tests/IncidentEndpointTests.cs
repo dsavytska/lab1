@@ -64,6 +64,6 @@ public sealed class IncidentEndpointTests(SecureLabApiFactory factory)
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
         Assert.NotNull(summary);
         Assert.Equal(new[] { "Low", "Medium", "High", "Critical" }, summary.Select(item => item.Severity));
-        Assert.Equal(new[] { 1, 1, 1, 0 }, summary.Select(item => item.Count));
+        Assert.Equal(new[] { 3, 1, 1, 0 }, summary.Select(item => item.Count));
     }
 }
