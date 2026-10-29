@@ -11,19 +11,40 @@ public static class Lab02Endpoints
     {
         app.MapGet("/api/incidents/search", async (string? q, string? sortBy, SecureLabDbContext db, CancellationToken ct) =>
         {
-            var order = sortBy switch
+            // ЛР 02 (fix): q передається як значення через LINQ + EF.Functions.ILike, а не вклеюється в SQL-текст.
+            // Символи \ % _ екрануються, щоб вони шукались буквально, а не як шаблон LIKE.
+            var pattern = "%" + EscapeLike(q ?? "") + "%";
+            var filtered = db.Incidents.AsNoTracking()
+                .Where(item => EF.Functions.ILike(item.Title, pattern, "\\")
+                            || EF.Functions.ILike(item.Description, pattern, "\\"));
+
+            // sortBy: allowlist — клієнт обирає один із написаних тут виразів, а не ім'я колонки.
+            IOrderedQueryable<Incident>? ordered = sortBy switch
             {
-                null or "" or "createdAtUtc" => "created_at_utc DESC",
-                "severity" => "severity", "status" => "status", _ => sortBy
+                null or "" or "createdAtUtc" => filtered.OrderByDescending(item => item.CreatedAtUtc),
+                "severity" => filtered.OrderBy(item =>
+                    item.Severity == IncidentSeverity.Critical ? 0 :
+                    item.Severity == IncidentSeverity.High ? 1 :
+                    item.Severity == IncidentSeverity.Medium ? 2 : 3),
+                "status" => filtered.OrderBy(item =>
+                    item.Status == IncidentStatus.New ? 0 :
+                    item.Status == IncidentStatus.Triaged ? 1 :
+                    item.Status == IncidentStatus.InProgress ? 2 :
+                    item.Status == IncidentStatus.Resolved ? 3 : 4),
+                _ => null
             };
-            var sql = "SELECT * FROM incidents WHERE title ILIKE '%" + (q ?? "")
-                + "%' OR description ILIKE '%" + (q ?? "") + "%' ORDER BY " + order + " LIMIT 50";
-            var rows = await db.Incidents.FromSqlRaw(sql).AsNoTracking().ToListAsync(ct);
-            return Results.Ok(rows.Select(row => new
+            if (ordered is null)
             {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    ["sortBy"] = ["Допустимі значення: createdAtUtc, severity, status."]
+                });
+            }
+
+            var rows = await ordered.ThenBy(item => item.Id).Take(50).ToListAsync(ct);
+            return Results.Ok(rows.Select(row => new IncidentSearchResponse(
                 row.Id, row.Title, row.Description,
-                Severity = row.Severity.ToString(), Status = row.Status.ToString(), row.CreatedAtUtc
-            }));
+                row.Severity.ToString(), row.Status.ToString(), row.CreatedAtUtc)));
         });
         app.MapPost("/api/incidents", async (CreateIncidentRequest request, SecureLabDbContext db, CancellationToken ct) =>
         {
@@ -98,6 +119,10 @@ public static class Lab02Endpoints
             return Results.Created($"/api/incidents/{incident.Id}", response);
         });
     }
+
+    // Екранування спецсимволів LIKE: спочатку сам символ екранування, потім % і _.
+    private static string EscapeLike(string value) =>
+        value.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 }
 
 public sealed record CreateIncidentRequest(
@@ -106,3 +131,7 @@ public sealed record CreateIncidentRequest(
 public sealed record CreatedIncidentResponse(
     Guid Id, string Title, string Severity, string Status,
     DateTimeOffset OccurredAtUtc, DateTimeOffset CreatedAtUtc);
+
+public sealed record IncidentSearchResponse(
+    Guid Id, string Title, string Description, string Severity, string Status,
+    DateTimeOffset CreatedAtUtc);
