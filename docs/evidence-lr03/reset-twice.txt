@@ -1,0 +1,10 @@
+## Reset-Twice.ps1 (два reset + тести)
+PS> powershell -NoProfile -ExecutionPolicy Bypass -File <ЛР3>\additional\commands\Reset-Twice.ps1
+Відновлення початкових локальних навчальних даних...
+Локальні навчальні дані очищено та повторно заповнено seed-значеннями.
+Passed!  - Failed:     0, Passed:     9, Skipped:     0, Total:     9, Duration: 2 s - SecureLab.Api.Tests.dll (net10.0)
+Відновлення початкових локальних навчальних даних...
+Локальні навчальні дані очищено та повторно заповнено seed-значеннями.
+Passed!  - Failed:     0, Passed:     9, Skipped:     0, Total:     9, Duration: 2 s - SecureLab.Api.Tests.dll (net10.0)
+PS> $LASTEXITCODE
+0

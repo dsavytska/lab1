@@ -1,0 +1,21 @@
+## T-02: той самий запит удруге (дублікат)
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/auth/register --data-binary @-
+тіло: {"userName":"regd418153c","email":"regd418153c@example.test","displayName":"Студентка 01","password":"***"}
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"message":"Registration failed"}
+
+## T-02: некоректні поля (email без @, displayName 121 символ)
+PS lab1>
+curl.exe -s -i -X POST http://localhost:5080/api/auth/register --data-binary @-
+тіло: {"userName":"bad user!","email":"not-an-email","displayName":"Я x121","password":"***"}
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"userName":["Дозволені латинські літери, цифри та символи - . _ @ +"],"email":["Некоректний формат email."],"displayName":["Ім'я для відображення не може бути довшим за 120 символів."]},"traceId":"00-ea32e668f34ffc279c027d01347913a9-22f3c31ecf9c4849-00"}

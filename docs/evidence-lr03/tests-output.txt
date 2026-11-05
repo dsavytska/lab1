@@ -1,0 +1,17 @@
+## dotnet test tests/SecureLab.Api.Tests -c Release (після змін)
+dotnet test tests/SecureLab.Api.Tests -c Release --logger "console;verbosity=normal"
+  Passed SecureLab.Api.Tests.Lab03AuthenticationTests.A02_LoginThenMe_ReturnsCurrentPrincipalOnly [2 s]
+  Passed SecureLab.Api.Tests.Lab03AuthenticationTests.A01_AnonymousCreate_Returns401_WithoutRedirect [26 ms]
+  Passed SecureLab.Api.Tests.Lab03AuthenticationTests.A05_BobCreatesWithForgedOwner_OwnerIsBob [261 ms]
+  Passed SecureLab.Api.Tests.SearchMechanicsTests.Search_ReturnsJson [148 ms]
+  Passed SecureLab.Api.Tests.Lab02ContractTests.Create_WithNumericSeverity_Returns400WithSeverityKey [203 ms]
+  Passed SecureLab.Api.Tests.Lab02ContractTests.Create_SameActiveTitleTwice_Returns409OnSecondRequest [113 ms]
+  Passed SecureLab.Api.Tests.IncidentEndpointTests.GetList_ReturnsSeededIncidents [111 ms]
+  Passed SecureLab.Api.Tests.IncidentEndpointTests.ClientScript_DoesNotUseDangerousInnerHtmlSink [9 ms]
+  Passed SecureLab.Api.Tests.IncidentEndpointTests.GetDetails_DoesNotExposeInternalOwnerFields [52 ms]
+  Passed SecureLab.Api.Tests.IncidentEndpointTests.GetSeveritySummary_ReturnsAllLevelsInCriticalityOrder [46 ms]
+  Passed SecureLab.Api.Tests.IncidentEndpointTests.GetDetails_ForUnknownId_ReturnsProblemDetails404 [6 ms]
+  Passed SecureLab.Api.Tests.AuthenticationMechanicsTests.RealCookie_ReachesSessionCheck [202 ms]
+Test Run Successful.
+Total tests: 12
+     Passed: 12
