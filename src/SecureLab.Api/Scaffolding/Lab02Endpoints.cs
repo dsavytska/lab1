@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using SecureLab.Api.Data;
 using SecureLab.Api.Data.Entities;
@@ -46,7 +47,7 @@ public static class Lab02Endpoints
                 row.Id, row.Title, row.Description,
                 row.Severity.ToString(), row.Status.ToString(), row.CreatedAtUtc)));
         });
-        app.MapPost("/api/incidents", async (CreateIncidentRequest request, SecureLabDbContext db, CancellationToken ct) =>
+        app.MapPost("/api/incidents", async (CreateIncidentRequest request, HttpContext httpContext, SecureLabDbContext db, CancellationToken ct) =>
         {
             // ЛР 02: server-side validation, бізнес-правила 2-A та власний response DTO.
             var now = DateTimeOffset.UtcNow; // фіксую поточний UTC-час один раз на запит
@@ -101,10 +102,15 @@ public static class Lab02Endpoints
                     detail: "Активний інцидент з такою назвою вже зареєстровано.");
             }
 
+            // ЛР 03: власник — лише перевірений користувач із cookie (principal), а не поле запиту
+            var ownerClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(ownerClaim, out var ownerUserId))
+                return Results.Problem(statusCode: StatusCodes.Status500InternalServerError);
+
             // 8. server-managed поля задає лише сервер
             var incident = new Incident
             {
-                Id = Guid.NewGuid(), OwnerUserId = DbSeeder.AliceId,
+                Id = Guid.NewGuid(), OwnerUserId = ownerUserId,
                 Title = title, Description = description,
                 Severity = severity, Status = IncidentStatus.New,
                 OccurredAtUtc = request.OccurredAtUtc!.Value.ToUniversalTime(),
@@ -117,7 +123,7 @@ public static class Lab02Endpoints
                 incident.Id, incident.Title, incident.Severity.ToString(), incident.Status.ToString(),
                 incident.OccurredAtUtc, incident.CreatedAtUtc);
             return Results.Created($"/api/incidents/{incident.Id}", response);
-        });
+        }).RequireAuthorization(); // ЛР 03: створення інциденту лише після входу
     }
 
     // Екранування спецсимволів LIKE: спочатку сам символ екранування, потім % і _.

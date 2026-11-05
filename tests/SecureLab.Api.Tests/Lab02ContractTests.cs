@@ -10,7 +10,10 @@ namespace SecureLab.Api.Tests;
 public sealed class Lab02ContractTests(SecureLabApiFactory factory)
     : IClassFixture<SecureLabApiFactory>
 {
-    private readonly HttpClient _client = factory.CreateClient();
+    // ЛР 03: POST /api/incidents тепер захищений, тож перевірки контракту ЛР 2 йдуть від імені Alice
+    private static string StudyPassword =>
+        Environment.GetEnvironmentVariable("SeedUsers__Password")
+        ?? throw new InvalidOperationException("Set local SeedUsers__Password outside Git.");
 
     [Fact]
     public async Task Create_WithNumericSeverity_Returns400WithSeverityKey()
@@ -24,7 +27,8 @@ public sealed class Lab02ContractTests(SecureLabApiFactory factory)
             occurredAtUtc = DateTimeOffset.UtcNow.AddHours(-1)
         };
 
-        using var response = await _client.PostAsJsonAsync("/api/incidents", request);
+        using var client = await factory.LoginAsync("alice", StudyPassword);
+        using var response = await client.PostAsJsonAsync("/api/incidents", request);
         var body = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -46,10 +50,11 @@ public sealed class Lab02ContractTests(SecureLabApiFactory factory)
             occurredAtUtc = DateTimeOffset.UtcNow.AddHours(-1)
         };
 
+        using var client = await factory.LoginAsync("alice", StudyPassword);
         try
         {
-            using var first = await _client.PostAsJsonAsync("/api/incidents", request);
-            using var second = await _client.PostAsJsonAsync("/api/incidents", request);
+            using var first = await client.PostAsJsonAsync("/api/incidents", request);
+            using var second = await client.PostAsJsonAsync("/api/incidents", request);
 
             Assert.Equal(HttpStatusCode.Created, first.StatusCode);
             Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
