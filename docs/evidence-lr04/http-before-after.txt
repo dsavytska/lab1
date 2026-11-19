@@ -1,0 +1,67 @@
+# ЛР04 — HTTP-докази до і після виправлення (витяг із журналу stage1; пароль і cookie не виводились)
+
+# Крок 4.3. До виправлення: Alice -> власний інцидент
+py -3 ..\lr04-resources\commands\login-and-read.py --user alice --incident alice
+login_status=204
+read_status=200
+{"id": "20000000-0000-0000-0000-000000000001", "title": "Підозрілий лист із вкладенням", "ownerDisplayName": "Аліса Коваль"}
+
+# Крок 4.4. До виправлення: Alice -> інцидент Bob (підміна лише id)
+py -3 ..\lr04-resources\commands\login-and-read.py --user alice --incident bob
+login_status=204
+read_status=200
+{"id": "20000000-0000-0000-0000-000000000002", "title": "Невідома спроба входу", "ownerDisplayName": "Боб Мельник"}
+
+# Крок 4.5. До виправлення: анонімний запит details без cookie
+curl.exe -s -i -X GET http://localhost:5080/api/incidents/20000000-0000-0000-0000-000000000001
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+X-Content-Type-Options: nosniff
+{"id":"20000000-0000-0000-0000-000000000001","title":"Підозрілий лист із вкладенням","description":"Одержано лист нібито від деканату. Вкладення не відкривалося.","severity":"Medium","status":"Triaged","occurredAtUtc":"2026-08-01T08:30:00+00:00","createdAtUtc":"2026-08-01T09:00:00+00:00","ownerDisplayName":"Аліса Коваль","comments":[{"id":"30000000-0000-0000-0000-000000000001","authorDisplayName":"Морган Литвин","text":"Заголовки листа передано аналітику.","createdAtUtc":"2026-08-01T09:30:00+00:00"}]}
+
+# До виправлення: Morgan (Analyst) -> інцидент Alice
+py -3 ..\lr04-resources\commands\login-and-read.py --user morgan --incident alice
+login_status=204
+read_status=200
+{"id": "20000000-0000-0000-0000-000000000001", "title": "Підозрілий лист із вкладенням", "ownerDisplayName": "Аліса Коваль"}
+
+# Крок 7. Після виправлення: Alice -> власний інцидент (A-02)
+py -3 ..\lr04-resources\commands\login-and-read.py --user alice --incident alice
+login_status=204
+read_status=200
+{"id": "20000000-0000-0000-0000-000000000001", "title": "Підозрілий лист із вкладенням", "ownerDisplayName": "Аліса Коваль"}
+
+# Крок 7. Після виправлення: Alice -> інцидент Bob (A-03)
+py -3 ..\lr04-resources\commands\login-and-read.py --user alice --incident bob
+login_status=204
+read_status=404
+{"title": "Інцидент не знайдено", "status": 404, "traceId": "00-febd5bde7a5180a5d1aa40b98b03cd8a-9ec85d3d4d25bd7e-00"}
+
+# Крок 7. Чужий і неіснуючий id тим самим клієнтом Alice: однакова відповідь
+curl.exe -s -i -X POST http://localhost:5080/api/auth/login (cookie jar) --data-binary @-
+тіло: {"userName":"alice","password":"***"}
+HTTP/1.1 204 No Content
+X-Content-Type-Options: nosniff
+curl.exe -s -i -X GET http://localhost:5080/api/incidents/20000000-0000-0000-0000-000000000002 (cookie jar)
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Інцидент не знайдено","status":404,"detail":"Інцидент не існує або недоступний.","traceId":"00-9d9a091efe8316b30bd36fabc88ab79c-029196f1f113e0ef-00"}
+curl.exe -s -i -X GET http://localhost:5080/api/incidents/20000000-0000-0000-0000-0000000000ff (cookie jar)
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Інцидент не знайдено","status":404,"detail":"Інцидент не існує або недоступний.","traceId":"00-11960686562f0393464fb37f25adde90-a8aa1ba6a1a5e7bc-00"}
+
+# Крок 7. Після виправлення: Morgan (Analyst) -> інцидент Alice (A-03R)
+py -3 ..\lr04-resources\commands\login-and-read.py --user morgan --incident alice
+login_status=204
+read_status=200
+{"id": "20000000-0000-0000-0000-000000000001", "title": "Підозрілий лист із вкладенням", "ownerDisplayName": "Аліса Коваль"}
+
+# Після виправлення: анонімний запит details
+curl.exe -s -i -X GET http://localhost:5080/api/incidents/20000000-0000-0000-0000-000000000001
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+X-Content-Type-Options: nosniff
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-d2c1c4098c7a5861d434a6996169fbdc-ebac4154f57e7b36-00"}
