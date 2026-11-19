@@ -7,11 +7,12 @@ async function load() {
   if (!response.ok) return;
   current = await response.json();
   document.querySelector("#title").textContent = current.title;
-  document.querySelector("#description").innerHTML = current.description;
+  // ЛР 05: опис — звичайний текст, тому записую його як текстовий вузол, а не HTML
+  document.querySelector("#description").textContent = current.description;
   document.querySelector("#comments").replaceChildren();
   for (const comment of current.comments ?? []) {
     const paragraph = document.createElement("p");
-    paragraph.innerHTML = comment.text;
+    paragraph.textContent = comment.text; // коментар теж лише текст
     document.querySelector("#comments").append(paragraph);
   }
   document.querySelector("#edit").elements.description.value = current.description;
