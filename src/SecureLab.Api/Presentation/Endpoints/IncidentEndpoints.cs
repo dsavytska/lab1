@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using SecureLab.Api.Application.Incidents;
+using SecureLab.Api.Data;
 using SecureLab.Api.Data.Entities;
 using SecureLab.Api.Presentation.Contracts;
 
@@ -8,8 +10,10 @@ public static class IncidentEndpoints
 {
     public static IEndpointRouteBuilder MapIncidentEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        // ЛР 04: уся група /api/incidents доступна лише після входу (анонім -> 401)
         var group = endpoints.MapGroup("/api/incidents")
-            .WithTags("Incidents");
+            .WithTags("Incidents")
+            .RequireAuthorization();
 
         group.MapGet("/", GetListAsync)
             .WithName("GetIncidents")
@@ -60,15 +64,24 @@ public static class IncidentEndpoints
 
     private static async Task<IResult> GetDetailsAsync(
         Guid id,
+        HttpContext httpContext,
         IncidentQueries queries,
         CancellationToken cancellationToken)
     {
-        var incident = await queries.GetDetailsAsync(id, cancellationToken);
-        return incident is null
-            ? Results.Problem(
-                title: "Інцидент не знайдено",
-                detail: $"Інцидент '{id}' не існує.",
-                statusCode: StatusCodes.Status404NotFound)
-            : Results.Ok(incident);
+        // ЛР 04: суб'єкта беру лише з перевіреної cookie, а не з URL чи тіла запиту
+        if (!Guid.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var currentUserId))
+            return Results.Unauthorized();
+        // Analyst за матрицею читає details будь-якого інциденту для аналізу
+        var canReadAll = httpContext.User.IsInRole(DbSeeder.AnalystRole);
+
+        var incident = await queries.GetDetailsAsync(id, currentUserId, canReadAll, cancellationToken);
+        // політика 404: чужий і неіснуючий інцидент дають однакову відповідь
+        return incident is null ? IncidentNotFound() : Results.Ok(incident);
     }
+
+    private static IResult IncidentNotFound() =>
+        Results.Problem(
+            title: "Інцидент не знайдено",
+            detail: "Інцидент не існує або недоступний.",
+            statusCode: StatusCodes.Status404NotFound);
 }

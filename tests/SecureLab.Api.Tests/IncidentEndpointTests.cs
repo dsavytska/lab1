@@ -9,12 +9,21 @@ namespace SecureLab.Api.Tests;
 public sealed class IncidentEndpointTests(SecureLabApiFactory factory)
     : IClassFixture<SecureLabApiFactory>
 {
+    // ЛР 04: група /api/incidents тепер вимагає входу, тому запити йдуть від імені Alice;
+    // app.js — статичний файл і лишається доступним без входу.
     private readonly HttpClient _client = factory.CreateClient();
+
+    private static string StudyPassword =>
+        Environment.GetEnvironmentVariable("SeedUsers__Password")
+        ?? throw new InvalidOperationException("Set local SeedUsers__Password outside Git.");
+
+    private Task<HttpClient> AliceAsync() => factory.LoginAsync("alice", StudyPassword);
 
     [Fact]
     public async Task GetList_ReturnsSeededIncidents()
     {
-        var incidents = await _client.GetFromJsonAsync<List<IncidentListItemResponse>>(
+        using var alice = await AliceAsync();
+        var incidents = await alice.GetFromJsonAsync<List<IncidentListItemResponse>>(
             "/api/incidents");
 
         Assert.NotNull(incidents);
@@ -25,7 +34,8 @@ public sealed class IncidentEndpointTests(SecureLabApiFactory factory)
     [Fact]
     public async Task GetDetails_ForUnknownId_ReturnsProblemDetails404()
     {
-        using var response = await _client.GetAsync($"/api/incidents/{Guid.NewGuid()}");
+        using var alice = await AliceAsync();
+        using var response = await alice.GetAsync($"/api/incidents/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
@@ -34,7 +44,8 @@ public sealed class IncidentEndpointTests(SecureLabApiFactory factory)
     [Fact]
     public async Task GetDetails_DoesNotExposeInternalOwnerFields()
     {
-        using var response = await _client.GetAsync(
+        using var alice = await AliceAsync();
+        using var response = await alice.GetAsync(
             $"/api/incidents/{DbSeeder.AliceIncidentId}");
         var json = await response.Content.ReadAsStringAsync();
         using var document = JsonDocument.Parse(json);
@@ -57,7 +68,8 @@ public sealed class IncidentEndpointTests(SecureLabApiFactory factory)
     [Fact]
     public async Task GetSeveritySummary_ReturnsAllLevelsInCriticalityOrder()
     {
-        using var response = await _client.GetAsync("/api/incidents/severity-summary");
+        using var alice = await AliceAsync();
+        using var response = await alice.GetAsync("/api/incidents/severity-summary");
         var summary = await response.Content.ReadFromJsonAsync<List<IncidentSeveritySummaryResponse>>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

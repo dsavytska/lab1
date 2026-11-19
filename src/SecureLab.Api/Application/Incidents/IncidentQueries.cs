@@ -31,13 +31,20 @@ public sealed class IncidentQueries(SecureLabDbContext dbContext, ILogger<Incide
             .ToListAsync(cancellationToken);
     }
 
-    public Task<IncidentDetailsResponse?> GetDetailsAsync(Guid id, CancellationToken cancellationToken)
+    // ЛР 04: query scoping — умова доступу стоїть у самому запиті до БД.
+    // Reporter отримує лише власний інцидент, Analyst (canReadAll) — будь-який для аналізу.
+    public Task<IncidentDetailsResponse?> GetDetailsAsync(
+        Guid id,
+        Guid currentUserId,
+        bool canReadAll,
+        CancellationToken cancellationToken)
     {
         logger.LogInformation("Loading incident {IncidentId}", id);
 
         return dbContext.Incidents
             .AsNoTracking()
             .Where(incident => incident.Id == id)
+            .Where(incident => canReadAll || incident.OwnerUserId == currentUserId)
             .Select(incident => new IncidentDetailsResponse(
                 incident.Id,
                 incident.Title,
