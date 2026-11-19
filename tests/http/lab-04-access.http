@@ -1,0 +1,49 @@
+# ЛР 04 — сценарій PoC IDOR/BOLA для GET /api/incidents/{id} (Савицька Д. О.)
+# Пароль не записую у файл: REST Client бере його зі змінної середовища SeedUsers__Password.
+# Cookie запам'ятовує сам клієнт; значень cookie у файлі немає.
+@host = http://localhost:5080
+@aliceId = 20000000-0000-0000-0000-000000000001
+@bobId = 20000000-0000-0000-0000-000000000002
+@unknownId = 20000000-0000-0000-0000-0000000000ff
+
+### 0. Анонімний запит до details (після ЛР 04 очікую 401)
+GET {{host}}/api/incidents/{{aliceId}}
+Accept: application/json
+
+### 1. Alice login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "alice", "password": "{{$processEnv SeedUsers__Password}}" }
+
+### 2. Own details (A-02: очікую 200, id = aliceId)
+GET {{host}}/api/incidents/{{aliceId}}
+Accept: application/json
+
+### 3. Foreign details with the same Alice cookie (A-03: до виправлення 200 з даними Bob, після — 404)
+GET {{host}}/api/incidents/{{bobId}}
+Accept: application/json
+
+### 4. Неіснуючий id тим самим клієнтом (відповідь має збігатися з п. 3, крім traceId)
+GET {{host}}/api/incidents/{{unknownId}}
+Accept: application/json
+
+### 5. Bob login changes current identity
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "bob", "password": "{{$processEnv SeedUsers__Password}}" }
+
+### 6. Bob own details (200)
+GET {{host}}/api/incidents/{{bobId}}
+Accept: application/json
+
+### 7. Morgan login; Analyst read
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "morgan", "password": "{{$processEnv SeedUsers__Password}}" }
+
+### 8. Permitted Analyst read (A-03R: 200)
+GET {{host}}/api/incidents/{{aliceId}}
+Accept: application/json
